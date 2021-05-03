@@ -12,9 +12,9 @@ const areEqual = (prevProps, nextProps) => {
 
 const DateTimePickerModal = memo(
   ({ date, mode, isVisible, onCancel, onConfirm, onHide, ...otherProps }) => {
-    const currentDateRef = useRef(new Date(date));
+    const currentDateRef = useRef(date);
     const [currentMode, setCurrentMode] = useState(null);
-    const [datePicker, setDate] = useState(new Date());
+    const [datePicker, setDate] = useState(date);
 
     useEffect(() => {
       if (isVisible && currentMode === null) {
@@ -23,7 +23,7 @@ const DateTimePickerModal = memo(
         setCurrentMode(null);
       } 
 
-      if(currentMode === "time"){
+      if(mode === "time"){
         setDate(new Date());
       }
     }, [isVisible, currentMode, mode]);
