@@ -67,7 +67,13 @@ export class DateTimePickerModal extends React.PureComponent {
 
   static getDerivedStateFromProps(props, state) {
     if (props.isVisible && !state.isPickerVisible) {
-      return { currentDate: props.date, isPickerVisible: true };
+      let year = new Date().getFullYear();
+      let month = new Date().getMonth();
+      let day = new Date().getDate();
+      let hours = new Date().getHours();
+      let minutes = new Date().getMinutes();
+      nextDate = new Date(year, month, day, hours, minutes);
+      return { currentDate: nextDate, isPickerVisible: true };
     }
     return null;
   }
