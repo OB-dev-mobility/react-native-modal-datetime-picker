@@ -12,14 +12,19 @@ const areEqual = (prevProps, nextProps) => {
 
 const DateTimePickerModal = memo(
   ({ date, mode, isVisible, onCancel, onConfirm, onHide, ...otherProps }) => {
-    const currentDateRef = useRef(date);
+    const currentDateRef = useRef(new Date(date));
     const [currentMode, setCurrentMode] = useState(null);
+    const [datePicker, setDate] = useState(new Date());
 
     useEffect(() => {
       if (isVisible && currentMode === null) {
         setCurrentMode(mode === "time" ? "time" : "date");
       } else if (!isVisible) {
         setCurrentMode(null);
+      } 
+
+      if(currentMode === "time"){
+        setDate(new Date());
       }
     }, [isVisible, currentMode, mode]);
 
@@ -31,30 +36,43 @@ const DateTimePickerModal = memo(
         onHide(false);
         return;
       }
+
       let nextDate = date;
       if (mode === "datetime") {
         if (currentMode === "date") {
           setCurrentMode("time");
           currentDateRef.current = new Date(date);
+          let year = currentDateRef.current.getFullYear();
+          let month = currentDateRef.current.getMonth();
+          let day = currentDateRef.current.getDate();
+          let hours = new Date().getHours();
+          let minutes = new Date().getMinutes();
+          nextDate = new Date(year, month, day, hours, minutes);
+          setDate(nextDate);
+          
           return;
         } else if (currentMode === "time") {
-          const year = currentDateRef.current.getFullYear();
-          const month = currentDateRef.current.getMonth();
-          const day = currentDateRef.current.getDate();
-          const hours = date.getHours();
-          const minutes = date.getMinutes();
+          currentDateRef.current = new Date(date);
+          let year = currentDateRef.current.getFullYear();
+          let month = currentDateRef.current.getMonth();
+          let day = currentDateRef.current.getDate();
+          let hours = date.getHours();
+          let minutes = date.getMinutes();
           nextDate = new Date(year, month, day, hours, minutes);
+          setDate(nextDate);
         }
       }
+
       onConfirm(nextDate);
       onHide(true, nextDate);
     };
 
+    
     return (
       <DateTimePicker
         {...otherProps}
         mode={currentMode}
-        value={date}
+        value={datePicker}
         onChange={handleChange}
       />
     );
@@ -75,7 +93,7 @@ DateTimePickerModal.propTypes = {
 DateTimePickerModal.defaultProps = {
   date: new Date(),
   isVisible: false,
-  onHide: () => {},
+  onHide: () => { },
 };
 
 export { DateTimePickerModal };
