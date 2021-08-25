@@ -13,22 +13,34 @@ const areEqual = (prevProps, nextProps) => {
 const DateTimePickerModal = memo(
   ({ date, mode, isVisible, onCancel, onConfirm, onHide, ...otherProps }) => {
     const currentDateRef = useRef(date);
-    const [currentMode, setCurrentMode] = useState(null);
-    const [datePicker, setDate] = useState(date);
+
+    const [userState, setUserState] = useState({
+      currentMode: null,
+      datePicker: date
+    });
 
     useEffect(() => {
-      if (isVisible && currentMode === null) {
-        setCurrentMode(mode === "time" ? "time" : "date");
+      if (isVisible && userState.currentMode === null) {
+        if (mode === "time") {
+          setUserState({
+            currentMode: "time",
+            datePicker: new Date()
+          });
+        } else {
+          setUserState({
+            currentMode: "date",
+            datePicker: date
+          });
+        }
       } else if (!isVisible) {
-        setCurrentMode(null);
-      } 
-
-      if(mode === "time"){
-        setDate(new Date());
+        setUserState({
+          currentMode: null,
+          datePicker: date
+        });
       }
-    }, [isVisible, currentMode, mode]);
+    }, [isVisible, userState.currentMode, mode]);
 
-    if (!isVisible || !currentMode) return null;
+    if (!isVisible || !userState.currentMode) return null;
 
     const handleChange = (event, date) => {
       if (event.type === "dismissed") {
@@ -39,8 +51,7 @@ const DateTimePickerModal = memo(
 
       let nextDate = date;
       if (mode === "datetime") {
-        if (currentMode === "date") {
-          setCurrentMode("time");
+        if (userState.currentMode === "date") {
           currentDateRef.current = new Date(date);
           let year = currentDateRef.current.getFullYear();
           let month = currentDateRef.current.getMonth();
@@ -48,10 +59,12 @@ const DateTimePickerModal = memo(
           let hours = new Date().getHours();
           let minutes = new Date().getMinutes();
           nextDate = new Date(year, month, day, hours, minutes);
-          setDate(nextDate);
-          
+          setUserState({
+            currentMode: "time",
+            datePicker: nextDate
+          });
           return;
-        } else if (currentMode === "time") {
+        } else if (userState.currentMode === "time") {
           currentDateRef.current = new Date(date);
           let year = currentDateRef.current.getFullYear();
           let month = currentDateRef.current.getMonth();
@@ -59,7 +72,10 @@ const DateTimePickerModal = memo(
           let hours = date.getHours();
           let minutes = date.getMinutes();
           nextDate = new Date(year, month, day, hours, minutes);
-          setDate(nextDate);
+          setUserState({
+            currentMode: null,
+            datePicker: nextDate
+          });
         }
       }
 
@@ -67,12 +83,12 @@ const DateTimePickerModal = memo(
       onHide(true, nextDate);
     };
 
-    
+
     return (
       <DateTimePicker
         {...otherProps}
-        mode={currentMode}
-        value={datePicker}
+        mode={userState.currentMode}
+        value={userState.datePicker}
         onChange={handleChange}
       />
     );
@@ -97,3 +113,4 @@ DateTimePickerModal.defaultProps = {
 };
 
 export { DateTimePickerModal };
+
